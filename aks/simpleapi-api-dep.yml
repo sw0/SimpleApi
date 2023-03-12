@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simpleapi-api
+  namespace: simpleapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simpleapi
+  template:
+    metadata:
+      labels:
+        app: simpleapi
+        kind: webapi
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: simpleapi
+          image: slindev.azurecr.io/simpleapi:0.2
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          env:
+            - name: REDIS__HOSTS__0__HOST
+              value: simpleapi-redis

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simpleapi-redis
+  namespace: simpleapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simpleapi-redis
+  template:
+    metadata:
+      labels:
+        app: simpleapi-redis
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: redis
+          image: redis
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 6379
+              name: redis
+          env:
+            - name: ALLOW_EMPTY_PASSWORD
+              value: 'yes'

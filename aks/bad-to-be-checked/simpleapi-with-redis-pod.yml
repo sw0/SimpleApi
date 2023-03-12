@@ -1,0 +1,25 @@
+# this is just a test
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simpleapi-pod 
+  namespace: simpleapi-bundle
+  labels:
+    kind: webapi
+    target: qa
+spec:
+  containers:
+  - image: slindev.azurecr.io/simpleapi:0.2
+    name: simpleapi
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    env:
+    - name: Redis__Hosts__0__Host
+      value: redis
+  - image: redis
+    name: redis
+    ports:
+    - containerPort: 6379
+  nodeSelector:
+    kubernetes.io/os: linux

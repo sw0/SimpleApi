@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simpleapi-api
+  namespace: simpleapi
+spec:
+  ports:
+    - port: 80
+  selector:
+    kind: webapi
+  type: LoadBalancer
