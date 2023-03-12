@@ -1,0 +1,28 @@
+version: '3.4'
+
+networks:
+  net_compose_1:
+    name: net_simpleapi_redis
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.30.0.0/16"
+services:
+  simpleapi:
+    image: ${DOCKER_REGISTRY-}simpleapi
+    build:
+      context: .
+      dockerfile: SimpleApi/Dockerfile
+    ports:
+      - "8080:80"
+      - "8443:443"
+    depends_on:
+      - redis
+    environment:
+      "Redis__Hosts__0__Host": "redis"
+    networks:
+      - net_compose_1
+  redis:
+    image: redis
+    networks:
+      - net_compose_1
