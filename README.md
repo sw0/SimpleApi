@@ -33,6 +33,7 @@ Secondly, to make it be able to connect to local redis service, we change the `D
 Then we can click "Docker" in Debbuging mode and access: https://localhost:32783/swagger/index.html
 * post/get  to get value from redis, like "k1"
 * post/set  to set value to redis
+* ping
 * redis/connectionInfo
 
 ## Way 2: Docker Compose
@@ -85,6 +86,7 @@ services:
 Lastly, launch the "docker-compose" project, and we can access following API to test the basic operation of redis in docker compose.
 * post/get
 * post/set
+* ping
 * redis/connectionInfo
 
 Or we can use `docker compose up -d` command to run the compose:
@@ -96,11 +98,13 @@ docker componse up -d
 Then you can access the service via following URLs (I've already set up the mapping in docker-compose YAML file):
 * http://localhost:8080/swagger
 * https://localhost:8443/swagger
+* http://localhost:8080/ping
 * http://localhost:8080/redis/connectionInfo
 
 And then you can test the redis on swagger UI by:
 * post/get
 * post/set
+* ping
 
 The last step, we can use `docker componse down` command to destroy the containers.
 docker run --hostname=542b948e942b --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=ASPNETCORE_URLS=http://+:80 --env=DOTNET_RUNNING_IN_CONTAINER=true --env=DOTNET_VERSION=6.0.14 --env=ASPNET_VERSION=6.0.14 --workdir=/app --label='com.microsoft.created-by=visual-studio' --label='com.microsoft.visual-studio.project-name=SimpleApi' --runtime=runc -d simpleapi:dev
@@ -173,7 +177,7 @@ kubectl get nodes
 cd SimpleApi
 
 # build the image
-docker build -f .\SimpleApi\Dockerfile . -t mydev/simpleapi:0.1
+docker build -f .\SimpleApi\Dockerfile . -t mydev/simpleapi:0.3
 
 ```
 
@@ -188,10 +192,10 @@ azure acr login --name dev230312
 az acr repository list --name dev230312 -o table
 
 # tag the image
-docker tag mydev/simpleapi:0.1 dev2303.azurecr.io/simpleapi:0.1
+docker tag mydev/simpleapi:0.3 dev2303.azurecr.io/simpleapi:0.3
 
 # push the image
-docker push dev2303.azurecr.io/simpleapi:0.1
+docker push dev2303.azurecr.io/simpleapi:0.3
 ```
 
 And here is an important step to attach ACR to AKS, so AKS can pull the images from ACR:
@@ -334,7 +338,11 @@ kubectl apply -f simpleapi-redis-dep.yml
 kubectl apply -f simpleapi-redis-svc.yml
 ```
 Now you can find the application got deployed into AKS. And you can find the public IP address after click "Services and ingresses" in left navigation blade.
-Then you can open a browser and access "http://IP-ADDRESS/swagger"
+Then you can open a browser and access "http://IP-ADDRESS/swagger" or "http://IP-ADDRESS/ping".
+
+Alternatively, I've combine all these yml file content together, so you can just run `kubectl apply -f ./simpleapi.yml`, which will also make it.
+
+From ~/ping, you can find the IP addresses, so if you get simpleapi-api-dep.yml with replicaset set to 2 or more, you can find the ip address will be changed if you refresh it or open a new browser to open it.
 
 4. Clean up resources
 ```bash
@@ -350,6 +358,8 @@ kubectl delete deployment simpleapi-redis -n simpleapi
 kubectl delete service simpleapi-redis -n simpleapi
 ```
 
+**NOTE**
+  All these steps can be exected locally if you got Kubernetes enabled in docker desktop.
 
 5. troubleshootings
   

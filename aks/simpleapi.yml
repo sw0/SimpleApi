@@ -1,34 +1,78 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: azure-vote
+  name: simpleapi
 spec:
   finalizers:
     - kubernetes
----
+--- 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: azure-vote-back
-  namespace: azure-vote
+  name: simpleapi-api
+  namespace: simpleapi
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: azure-vote-back
+      app: simpleapi
   template:
     metadata:
       labels:
-        app: azure-vote-back
+        app: simpleapi
+        kind: webapi
     spec:
       nodeSelector:
         kubernetes.io/os: linux
       containers:
-        - name: azure-vote-back
-          image: mcr.microsoft.com/oss/bitnami/redis:6.0.8
+        - name: simpleapi
+          image: slindev.azurecr.io/simpleapi:0.3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 80
+              protocol: TCP
           env:
-            - name: ALLOW_EMPTY_PASSWORD
-              value: 'yes'
+            - name: REDIS__HOSTS__0__HOST
+              value: simpleapi-redis
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: simpleapi-api
+  namespace: simpleapi
+spec:
+  ports:
+    - port: 80
+  selector:
+    kind: webapi
+  type: LoadBalancer
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simpleapi-redis
+  namespace: simpleapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simpleapi-redis
+  template:
+    metadata:
+      labels:
+        app: simpleapi-redis
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: redis
+          image: redis
           resources:
             requests:
               cpu: 100m
@@ -39,59 +83,18 @@ spec:
           ports:
             - containerPort: 6379
               name: redis
----
+          env:
+            - name: ALLOW_EMPTY_PASSWORD
+              value: 'yes'
+--- 
 apiVersion: v1
 kind: Service
 metadata:
-  name: azure-vote-back
-  namespace: azure-vote
+  name: simpleapi-redis
+  namespace: simpleapi
 spec:
   ports:
     - port: 6379
   selector:
-    app: azure-vote-back
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: azure-vote-front
-  namespace: azure-vote
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: azure-vote-front
-  template:
-    metadata:
-      labels:
-        app: azure-vote-front
-    spec:
-      nodeSelector:
-        kubernetes.io/os: linux
-      containers:
-        - name: azure-vote-front
-          image: mcr.microsoft.com/azuredocs/azure-vote-front:v1
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 250m
-              memory: 256Mi
-          ports:
-            - containerPort: 80
-          env:
-            - name: REDIS
-              value: azure-vote-back
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: azure-vote-front
-  namespace: azure-vote
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 80
-  selector:
-    app: azure-vote-front
+    app: simpleapi-redis
+

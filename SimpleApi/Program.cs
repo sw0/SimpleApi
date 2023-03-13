@@ -41,7 +41,8 @@ app.MapControllers();
 //var result = redisDatabase.GetAsync<ValueTypeRedisItem<bool>>("myCacheKey")
 //    .GetAwaiter()
 //    .GetResult();
-
+app.MapPing();
+app.MapApiPing();
 app.Run();
 
 /// <summary>
