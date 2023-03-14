@@ -5,6 +5,7 @@ I am planning to use a YAML file to compose:
 * redis
 
 Reference: 
+* https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 * https://github.com/imperugo/StackExchange.Redis.Extensions
 * https://taswar.zeytinsoft.com/redis-for-net-developers-redis-with-aspnetcore-webapi/
 
@@ -356,10 +357,18 @@ kubectl delete service simpleapi-api -n simpleapi
 
 kubectl delete deployment simpleapi-redis -n simpleapi
 kubectl delete service simpleapi-redis -n simpleapi
+
+# OR we can just use 
+kubectl delete -f .
 ```
 
 **NOTE**
-  All these steps can be exected locally if you got Kubernetes enabled in docker desktop.
+  All these steps can be exected locally if you got Kubernetes enabled in docker desktop. And in locally, we need to use `kubectl port-forwrad POD 5000:80` to forward the port, otherwise, we cannot access the service deployed locally.
+
+## Commands
+For full command list for `kubectl`, you can check: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+
+Here we can use `kubectl config set-context --current --namespace simpleapi` to set the default namespace.
 
 5. troubleshootings
   

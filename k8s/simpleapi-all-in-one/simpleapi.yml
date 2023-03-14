@@ -26,7 +26,7 @@ spec:
         kubernetes.io/os: linux
       containers:
         - name: simpleapi
-          image: slindev.azurecr.io/simpleapi:0.3
+          image: slindev.azurecr.io/simpleapi:0.4
           resources:
             requests:
               cpu: 100m

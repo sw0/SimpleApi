@@ -9,23 +9,27 @@ namespace SimpleApi.Controllers
     [Route("[controller]")]
     public class PostController : ControllerBase
     {
-        private readonly IRedisDatabase redisDatabase;
-        private readonly IRedisConnectionPoolManager pool;
+        private readonly IRedisDatabase _redisDatabase;
+        private readonly IRedisConnectionPoolManager _pool;
+        private readonly ILogger<PostController> _logger;
 
-        public PostController(IRedisDatabase redisDatabase, IRedisConnectionPoolManager pool)
+        public PostController(IRedisDatabase redisDatabase, IRedisConnectionPoolManager pool, ILogger<PostController> logger)
         {
-            this.redisDatabase = redisDatabase;
-            this.pool = pool;
+            _redisDatabase = redisDatabase;
+            _pool = pool;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<string> IndexAsync()
         {
-            var before = pool.GetConnectionInformation();
-            var rng = new Random();
-            await redisDatabase.AddAsync($"key-{rng}", new User { Id = rng.Next(), Name = $"User.{rng.Next()}" }).ConfigureAwait(false);
+            _logger.LogInformation("Api PostController.Index got called."); //to see the log in container insights
 
-            var after = pool.GetConnectionInformation();
+            var before = _pool.GetConnectionInformation();
+            var rng = new Random();
+            await _redisDatabase.AddAsync($"key-{rng}", new User { Id = rng.Next(), Name = $"User.{rng.Next()}" }).ConfigureAwait(false);
+
+            var after = _pool.GetConnectionInformation();
 
             return BuildInfo(before) + "\t" + BuildInfo(after);
 
@@ -39,7 +43,9 @@ namespace SimpleApi.Controllers
         [Route("get")]
         public async Task<User> GetAsync(string key)
         {
-            var result = await redisDatabase.GetAsync<User>(key).ConfigureAwait(false);
+            _logger.LogInformation("Api PostController.GetAsync got called."); //to see the log in container insights
+
+            var result = await _redisDatabase.GetAsync<User>(key).ConfigureAwait(false);
 
             return result!;
         }
@@ -48,7 +54,8 @@ namespace SimpleApi.Controllers
         [Route("set")]
         public async Task<bool> SetAsync(string key, int id, string name)
         {
-            var result = await redisDatabase.AddAsync<User>(key, new User { Id = id, Name = name }).ConfigureAwait(false);
+            _logger.LogInformation("Api PostController.SetAsync got called. key: {0}, id: {1} and name: {2}", key, id, name); //to see the log in container insights
+            var result = await _redisDatabase.AddAsync<User>(key, new User { Id = id, Name = name }).ConfigureAwait(false);
 
             return result;
         }
